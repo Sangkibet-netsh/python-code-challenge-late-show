@@ -14,6 +14,17 @@ class Episode(db.Model):
 
     appearances = db.relationship('Appearance', backref='episode', cascade='all, delete-orphan')
 
+class Appearance(db.Model):
+    __tablename__ = 'appearance'
+
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer, nullable=False)
+    episode_id = db.Column(db.Integer, db.ForeignKey('episode.id'), nullable=False)
+    guest_id = db.Column(db.Integer, db.ForeignKey('guest.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    
 class Guest(db.Model):
     __tablename__ = 'guest'
 
