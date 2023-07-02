@@ -58,7 +58,18 @@ class SingleEpisodeResource(Resource):
             return '', 204
         else:
             return {'error': 'Episode not found'}, 404
-
+class GuestResource(Resource):
+    def get(self):
+        guests = Guest.query.all()
+        data = [
+            {
+                'id': guest.id,
+                'name': guest.name,
+                'occupation': guest.occupation
+            }
+            for guest in guests
+        ]
+        return data
 
 
 if __name__ == '__main__':
