@@ -17,6 +17,18 @@ db.init_app(app)
 def home():
     return ''
 
+@app.route('/episodes', methods=['GET'])
+def get_episodes():
+    episodes = Episode.query.all()
+    data = [
+        {
+            'id': episode.id,
+            'date': episode.date,
+            'number': episode.number
+        }
+        for episode in episodes
+    ]
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(port=5555)
