@@ -1,4 +1,5 @@
 import datetime
+from attr import validate
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -23,6 +24,12 @@ class Appearance(db.Model):
     guest_id = db.Column(db.Integer, db.ForeignKey('guest.id'), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
+
+    @validate('rating')
+    def validate_rating(self, key, rating):
+        if not (1 <= rating <= 5):
+            raise ValueError("Rating must be between 1 and 5 (inclusive).")
+        return rating
 
 class Guest(db.Model):
     __tablename__ = 'guest'
