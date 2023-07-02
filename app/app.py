@@ -4,7 +4,7 @@ from flask import Flask, make_response
 from flask_migrate import Migrate
 from flask_restful import Api, Resource, reqparse
 
-from models import db, Episode,Appearance,GuestS
+from models import Guest, db, Episode,Appearance
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -70,6 +70,54 @@ class GuestResource(Resource):
             for guest in guests
         ]
         return data
+
+class AppearanceResource(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('rating', type=int, required=True)
+    parser.add_argument('episode_id', type=int, required=True)
+    parser.add_argument('guest_id', type=int, required=True)
+
+    def post(self):
+        args = self.parser.parse_args()
+        rating = args['rating']
+        episode_id = args['episode_id']
+        guest_id = args['guest_id']
+
+        episode = Episode.query.get(episode_id)
+        guest = Guest.query.get(guest_id)
+
+        if not episode:
+            return {'error': 'Episode not found'}, 404
+
+        if not guest:
+            return {'error': 'Guest not found'}, 404
+
+        if not (1 <= rating <= 5):
+            return {'errors': ['Validation error. Rating must be between 1 and 5 (inclusive).']}, 400
+
+        appearance = Appearance(rating=rating, episode=episode, guest=guest)
+        db.session.add(appearance)
+        db.session.commit()
+
+        response_data = {
+            'id': appearance.id,
+            'rating': appearance.rating,
+            'episode': {
+                'id': episode.id,
+                'date': episode.date,
+                'number': episode.number
+            },
+            'guest': {
+                'id': guest.id,
+                'name': guest.name,
+                'occupation': guest.occupation
+            }
+        }
+        return response_data, 201
+api.add_resource(EpisodeResource, '/episodes')
+api.add_resource(SingleEpisodeResource, '/episodes/<int:id>')
+api.add_resource(GuestResource, '/guests')
+api.add_resource(AppearanceResource, '/appearances')
 
 
 if __name__ == '__main__':
