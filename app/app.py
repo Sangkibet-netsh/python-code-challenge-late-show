@@ -28,6 +28,37 @@ class EpisodeResource(Resource):
             for episode in episodes
         ]
         return data
+    
+class SingleEpisodeResource(Resource):
+    def get(self, id):
+        episode = Episode.query.get(id)
+        if episode:
+            data = {
+                'id': episode.id,
+                'date': episode.date,
+                'number': episode.number,
+                'guests': [
+                    {
+                        'id': appearance.guest.id,
+                        'name': appearance.guest.name,
+                        'occupation': appearance.guest.occupation
+                    }
+                    for appearance in episode.appearances
+                ]
+            }
+            return data
+        else:
+            return {'error': 'Episode not found'}, 404
+
+    def delete(self, id):
+        episode = Episode.query.get(id)
+        if episode:
+            db.session.delete(episode)
+            db.session.commit()
+            return '', 204
+        else:
+            return {'error': 'Episode not found'}, 404
+
 
 
 if __name__ == '__main__':
