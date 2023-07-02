@@ -2,8 +2,9 @@
 
 from flask import Flask, make_response
 from flask_migrate import Migrate
+from flask_restful import Api, Resource, reqparse
 
-from models import db, Episode
+from models import db, Episode,Appearance,GuestS
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -13,22 +14,21 @@ migrate = Migrate(app, db)
 
 db.init_app(app)
 
-@app.route('/')
-def home():
-    return ''
+api = Api(app)
 
-@app.route('/episodes', methods=['GET'])
-def get_episodes():
-    episodes = Episode.query.all()
-    data = [
-        {
-            'id': episode.id,
-            'date': episode.date,
-            'number': episode.number
-        }
-        for episode in episodes
-    ]
-    return jsonify(data)
+class EpisodeResource(Resource):
+    def get(self):
+        episodes = Episode.query.all()
+        data = [
+            {
+                'id': episode.id,
+                'date': episode.date,
+                'number': episode.number
+            }
+            for episode in episodes
+        ]
+        return data
+
 
 if __name__ == '__main__':
     app.run(port=5555)
